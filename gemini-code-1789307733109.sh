@@ -1,0 +1,79 @@
+# ==========================================
+# 12. Smart Shell & History Improvements
+# ==========================================
+export HISTSIZE=100000
+export HISTFILESIZE=100000
+export HISTCONTROL=ignoreboth:erasedups # Exclude duplicates and lines starting with spaces
+export HISTTIMEFORMAT="%F %T "          # Add date/time stamps to `history` output
+shopt -s histappend                     # Append history instead of overwriting on exit
+shopt -s cdspell                        # Automatically fix minor typos when using `cd`
+shopt -s checkwinsize                   # Recalculate terminal window dimensions after commands
+shopt -s autocd                         # Type a directory name directly to `cd` into it
+
+# ==========================================
+# 13. Advanced Navigation Functions
+# ==========================================
+
+# Create a directory and enter it immediately (e.g., mkcd my_folder)
+mkcd() {
+    mkdir -p "$1" && cd "$1"
+}
+
+# Move up N directory levels (e.g., "up 3" goes up 3 folders)
+up() {
+    local levels="${1:-1}"
+    local path=""
+    for ((i=1; i<=levels; i++)); do
+        path="../$path"
+    done
+    cd "$path"
+}
+
+# ==========================================
+# 14. File & Backup Utilities
+# ==========================================
+
+# Make an instant .bak copy of any file (e.g., bak config.txt -> config.txt.bak)
+bak() {
+    cp -ri "$1" "${1}.bak"
+}
+
+# Restore a .bak file (e.g., unbak config.txt.bak -> config.txt)
+unbak() {
+    local original="${1%.bak}"
+    mv -ri "$1" "$original"
+}
+
+# Create a timestamped archive of a folder (e.g., quicktar my_folder)
+quicktar() {
+    tar -czvf "${1%/}_$(date +%Y%m%d_%H%M%S).tar.gz" "$1"
+}
+
+# ==========================================
+# 15. Process & Resource Inspection
+# ==========================================
+alias topmem="ps aux --sort=-%mem | head -n 11" # Top 10 memory-consuming processes
+alias topcpu="ps aux --sort=-%cpu | head -n 11" # Top 10 CPU-consuming processes
+
+# Kill a process by name cleanly (e.g., killp firefox)
+killp() {
+    ps aux | grep -i "$1" | grep -v "grep" | awk '{print $2}' | xargs -r sudo kill -9
+}
+
+# ==========================================
+# 16. Network & Web Helpers
+# ==========================================
+alias weather="curl -s 'wttr.in?m'"            # Quick terminal weather report
+alias localips="ip -brief addr show"           # Clean table of local interface IPs
+
+# Fetch HTTP headers for a web URL (e.g., httphead example.com)
+httphead() {
+    curl -I -s -L "$1"
+}
+
+# ==========================================
+# 17. Container & Docker Helpers (Optional)
+# ==========================================
+alias dps="docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'"
+alias dstopall="docker stop \$(docker ps -q)"
+alias dprune="docker system prune -af --volumes"
