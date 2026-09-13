@@ -1,0 +1,140 @@
+    //BASHRC FEDORA version
+
+# ==========================================
+# 1. Nice Username Colors
+# ==========================================
+export PS1='\[\e[0;36m\]\u\[\e[0m\]@\[\e[0;32m\]\h\[\e[0m\]:\[\e[0;35m\]\w\[\e[0m\]> '
+
+# ==========================================
+# 2. Nice LS Colors
+# ==========================================
+test -r ~/.dir_colors && eval $(dircolors ~/.dir_colors)
+
+# ==========================================
+# 3. Quick Directory Navigation
+# ==========================================
+alias ..="cd .."
+alias cd..="cd .."
+alias ...="cd ../../"
+alias ....="cd ../../../"
+alias .....="cd ../../../../"
+
+# ==========================================
+# 4. LS Shortcuts
+# ==========================================
+alias ll='ls -lh'
+alias la='ls -lAh'
+alias lt='ls -ltrh'
+
+# ==========================================
+# 5. Safe Operations & Smart Defaults
+# ==========================================
+alias cp='cp -vi'
+alias mv='mv -vi'
+alias rm='rm -i'
+alias mkdir='mkdir -pv'
+
+# ==========================================
+# 6. Verbose Copying (Rsync)
+# ==========================================
+alias cpv='rsync -avh --info=progress2'
+
+# ==========================================
+# 7. Fedora Package Management (DNF & Flatpak)
+# ==========================================
+alias update="sudo dnf --refresh upgrade -y && sudo dnf autoremove -y && sudo dnf clean packages"
+alias flatup="flatpak update -y"
+alias dnfi="sudo dnf install"
+alias dnfs="dnf search"
+alias dnfr="sudo dnf remove"
+
+# ==========================================
+# 8. General System & Utility Aliases
+# ==========================================
+alias bashrc="nano ~/.bashrc"
+alias reload="source ~/.bashrc"
+alias suno="sudo nano"
+alias n="nano"
+alias c='clear'
+alias count="ls -1 | wc -l"
+alias certupdate="sudo certbot certonly --manual -d *.website.com -d website.com --agree-tos --no-bootstrap --manual-public-ip-logging-ok --preferred-challenges dns-01 --server https://acme-v02.api.letsencrypt.org/directory"
+alias myserver="ssh -p 12345 roman@192.168.0.1"
+
+# ==========================================
+# 9. System Info & Monitoring
+# ==========================================
+alias df="df -h"
+alias free="free -m"
+alias usage="du -h -d 1 2>/dev/null | sort -hr"
+alias myip="curl -s ifconfig.me; echo"
+alias ports="sudo ss -tulpn"
+
+# ==========================================
+# 10. Git Shortcuts
+# ==========================================
+alias gs="git status"
+alias ga="git add ."
+alias gc="git commit -m"
+alias gp="git push"
+alias gl="git log --oneline --graph --decorate"
+
+# ==========================================
+# 11. Helper Functions
+# ==========================================
+
+# Find string in current directory
+fstr() {
+    grep -Rnw "." -e "$1"
+}
+
+# Search running processes
+psg() {
+    ps aux | grep -i "$1" | grep -v "grep -i"
+}
+
+# Execute last command with sudo or prepend sudo
+s() {
+    if [[ $# == 0 ]]; then
+        sudo $(history -p '!!')
+    else
+        sudo "$@"
+    fi
+}
+
+# Universal Archive Extractor
+function extract {
+    if [ $# -eq 0 ]; then
+        echo "Usage: extract <path/file_name>.<ext>"
+        return 1
+    fi
+    for n in "$@"; do
+        if [ ! -f "$n" ]; then
+            echo "'$n' - file doesn't exist"
+            return 1
+        fi
+
+        case "${n%,}" in
+            *.cbt|*.tar.bz2|*.tar.gz|*.tar.xz|*.tbz2|*.tgz|*.txz|*.tar) tar -xvf "$n" ;;
+            *.lzma)      unlzma ./"$n"      ;;
+            *.bz2)       bunzip2 ./"$n"     ;;
+            *.cbr|*.rar) unrar x -ad ./"$n" ;;
+            *.gz)        gunzip ./"$n"      ;;
+            *.cbz|*.epub|*.zip) unzip ./"$n" ;;
+            *.z)         uncompress ./"$n"  ;;
+            *.7z|*.apk|*.arj|*.cab|*.cb7|*.chm|*.deb|*.iso|*.lzh|*.msi|*.pkg|*.rpm|*.udf|*.wim|*.xar|*.vhd) 7z x ./"$n" ;;
+            *.xz)        unxz ./"$n"        ;;
+            *.exe)       cabextract ./"$n"  ;;
+            *.cpio)      cpio -id < ./"$n"  ;;
+            *.cba|*.ace) unace x ./"$n"     ;;
+            *.zpaq)      zpaq x ./"$n"      ;;
+            *.arc)       arc e ./"$n"       ;;
+            *.cso)       ciso 0 ./"$n" ./"$n.iso" && extract "$n.iso" && \rm -f "$n" ;;
+            *.zlib)      zlib-flate -uncompress < ./"$n" > ./"$n.tmp" && mv ./"$n.tmp" ./"${n%.*zlib}" && rm -f "$n" ;;
+            *.dmg)       hdiutil mount ./"$n" -mountpoint "./$n.mounted" ;;
+            *.tar.zst)   tar -I zstd -xvf ./"$n" ;;
+            *.zst)       zstd -d ./"$n"     ;;
+            *)           echo "extract: '$n' - unknown archive method" ; return 1 ;;
+        esac
+    done
+}
+
