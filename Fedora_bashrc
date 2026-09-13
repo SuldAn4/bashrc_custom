@@ -57,8 +57,6 @@ alias suno="sudo nano"
 alias n="nano"
 alias c='clear'
 alias count="ls -1 | wc -l"
-alias certupdate="sudo certbot certonly --manual -d *.website.com -d website.com --agree-tos --no-bootstrap --manual-public-ip-logging-ok --preferred-challenges dns-01 --server https://acme-v02.api.letsencrypt.org/directory"
-alias myserver="ssh -p 12345 roman@192.168.0.1"
 
 # ==========================================
 # 9. System Info & Monitoring
